@@ -9,9 +9,14 @@ services:
       POSTGRES_PASSWORD: "user#12345"
       POSTGRES_USER: "user"
       POSTGRES_DB: chat
-    ports:
-      - '5432:5432'
-      
+  
+  cache: 
+    image: redis:7-alpine
+    volumes:
+      - ./redis/redis.conf:/etc/redis/redis.conf
+    command: ["redis-server", "/etc/redis/redis.conf"]
+
+
   nginx:
     image: nginx:stable-alpine
     depends_on:
@@ -30,6 +35,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - db
+      - cache
     env_file:
       - ./server/.env
     restart: unless-stopped

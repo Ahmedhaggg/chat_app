@@ -10,6 +10,11 @@ import config from './config';
 import { DatabaseSeederService } from './DatabaseSeederService';
 import { JwtModule } from '@nestjs/jwt';
 import { CloudinaryModule } from '@modules/uploaderModules/cloudinaryModule/Cloudinary.module';
+import { InvitationssdModule } from './modules/invitationssd/invitationssd.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { RedisClientOptions } from 'redis';
+import  * as redisStore from 'cache-manager-redis-store';
+import { RedisModule } from 'nestjs-redis';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,7 +29,6 @@ import { CloudinaryModule } from '@modules/uploaderModules/cloudinaryModule/Clou
       })}
     }),
     JwtModule.registerAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
           return {
@@ -35,7 +39,6 @@ import { CloudinaryModule } from '@modules/uploaderModules/cloudinaryModule/Clou
       global: true
     }),
     CloudinaryModule.registerAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         return {
@@ -45,9 +48,28 @@ import { CloudinaryModule } from '@modules/uploaderModules/cloudinaryModule/Clou
         }
       },
     }),
+    CacheModule.registerAsync<RedisClientOptions>({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        store: redisStore as any,
+        host: configService.get('REDIS_HOST'),
+        port: configService.get('REDIS_PORT'),
+        ttl: 0,
+        maxMemoryPolicy: 'allkeys-lru'
+      }),
+      isGlobal: true,
+    }),
+    RedisModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        host: config.get('REDIS_HOST'),
+        port: config.get('REDIS_PORT')
+      })
+    }),
     AuthModule,
     UserModule,
-    GroupsModule
+    GroupsModule,
+    InvitationssdModule
   ],
   controllers: [AppController],
   providers: [AppService, DatabaseSeederService],
