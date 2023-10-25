@@ -9,12 +9,10 @@ import { GroupsModule } from './modules/groups/groups.module';
 import config from './config';
 import { DatabaseSeederService } from './DatabaseSeederService';
 import { JwtModule } from '@nestjs/jwt';
-import { CloudinaryModule } from '@modules/uploaderModules/cloudinaryModule/Cloudinary.module';
-import { InvitationssdModule } from './modules/invitationssd/invitationssd.module';
-import { CacheModule } from '@nestjs/cache-manager';
-import { RedisClientOptions } from 'redis';
-import  * as redisStore from 'cache-manager-redis-store';
-import { RedisModule } from 'nestjs-redis';
+import { CloudinaryModule } from '@shared/uploaderModules/cloudinaryModule/Cloudinary.module';
+import { OnlineUsersModule } from './modules/onlineUsers/onlineUsers.module';
+import { RedisCacheMoudle } from 'src/shared/redisCache/redisCache.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,7 +21,7 @@ import { RedisModule } from 'nestjs-redis';
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
+      useFactory: (configService: ConfigService) => {
         return ({
           ...configService.get('database')
       })}
@@ -48,28 +46,11 @@ import { RedisModule } from 'nestjs-redis';
         }
       },
     }),
-    CacheModule.registerAsync<RedisClientOptions>({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        store: redisStore as any,
-        host: configService.get('REDIS_HOST'),
-        port: configService.get('REDIS_PORT'),
-        ttl: 0,
-        maxMemoryPolicy: 'allkeys-lru'
-      }),
-      isGlobal: true,
-    }),
-    RedisModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        host: config.get('REDIS_HOST'),
-        port: config.get('REDIS_PORT')
-      })
-    }),
+    RedisCacheMoudle.registerAsync(),
     AuthModule,
     UserModule,
     GroupsModule,
-    InvitationssdModule
+    OnlineUsersModule
   ],
   controllers: [AppController],
   providers: [AppService, DatabaseSeederService],
@@ -82,3 +63,23 @@ export class AppModule {
   }
 }
 
+// CacheModule.registerAsync<RedisClientOptions>({
+    //   inject: [ConfigService],
+    //   useFactory: (configService: ConfigService) => ({
+    //     store: redisStore as any,
+    //     host: configService.get('REDIS_HOST'),
+    //     port: configService.get('REDIS_PORT'),
+    //     ttl: 0,
+    //     maxMemoryPolicy: 'allkeys-lru'
+    //   }),
+    //   isGlobal: true,
+    // }),
+    // RedisModule.forRootAsync({
+    //   inject: [ConfigService],
+    //   useFactory: (config: ConfigService) => {
+    //     console.log(config.get('REDIS_HOST'))
+    //     return ({
+    //     host: config.get('REDIS_HOST'),
+    //     port: config.get('REDIS_PORT')
+    //   })}
+    // }),

@@ -1,6 +1,6 @@
 import { ReqUser } from "@common/decorators/user.decoratory";
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from "@nestjs/common";
-import { CreateInvitationDto } from "../dto/createInvitation.dto";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from "@nestjs/common";
+// import { CreateInvitationDto } from "../dto/createGroupInvitation.dto";
 import { GroupInvitationService } from "../services/groupInvitation.service";
 import { ApiBearerAuth } from "@nestjs/swagger";
 
@@ -9,25 +9,27 @@ import { ApiBearerAuth } from "@nestjs/swagger";
 export class GroupInvaitationController {
     constructor(private groupInvitationService : GroupInvitationService) {}
 
-    @Post("/:groupId/invitations")
-    async create(
-        @ReqUser() user, 
-        @Body("receiverId", ParseIntPipe) receiverId: number, 
-        @Param("groupId", ParseIntPipe) groupId: number 
-    ) {
-        await this.groupInvitationService.create({ 
-            senderId: user.id, 
-            receiverId
-        })
-    }
+    // @Post("/:groupId/invitations")
+    // async create(
+    //     @ReqUser() user, 
+    //     @Body("receiverId", ParseIntPipe) receiverId: number, 
+    //     @Param("groupId", ParseIntPipe) groupId: number 
+    // ) {
+    //     await this.groupInvitationService.create({ 
+    //         senderId: user.id, 
+    //         receiverId
+    //     })
+    // }
 
-    @Get("/:groupId/invitations")
-    async findAll(
-        @ReqUser() user,
-        @Param("groupId", ParseIntPipe) groupId: number 
-    ) {
-       let invitations = await this.groupInvitationService.findInvitationsSentByMember(user.id, groupId);
-       return { invitations }
-    }
+    // @Get("/:groupId/invitations")
+    // async findAll(
+    //     @ReqUser() user,
+    //     @Param("groupId", ParseIntPipe) groupId: number 
+    // ) {
+    //    let invitations = await this.groupInvitationService.findInvitationsSentByMember(user.id, groupId);
+    //    return { invitations }
+    // }
     
+    // @Delete(":groupId/invitations/:invitationId")
+    // async destroy(@ReqUser() user, @Param("invitationId", ))
 }
